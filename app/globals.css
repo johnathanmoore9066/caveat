@@ -28,7 +28,7 @@ body {
 
 @layer components {
   .wrap {
-    @apply mx-auto w-full max-w-prose px-5;
+    @apply mx-auto w-full max-w-4xl px-6;
   }
 
   .display {

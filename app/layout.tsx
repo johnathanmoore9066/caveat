@@ -20,7 +20,7 @@ export default function RootLayout({
           <div className="wrap flex items-center justify-between py-5">
             <Link href="/" className="display text-xl font-semibold">
               {siteConfig.name}
-              <span className="ml-2 align-middle text-flag">.</span>
+              <span className="align-middle text-flag">.</span>
             </Link>
             <nav className="flex items-center gap-5 font-sans text-sm text-muted">
               <Link href="/" className="hover:text-ink">
