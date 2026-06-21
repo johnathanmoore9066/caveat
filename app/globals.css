@@ -12,18 +12,47 @@ body {
   color: theme("colors.ink");
   font-family: theme("fontFamily.sans");
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Subtle paper grain via a faint repeating ruled line, like a legal pad edge. */
+/* Warm, lit paper: a soft highlight up top and a faint gold wash to one side. */
 body {
-  background-image: linear-gradient(
-    to bottom,
-    transparent,
-    transparent 31px,
-    rgba(28, 27, 25, 0.025) 31px,
-    rgba(28, 27, 25, 0.025) 32px
-  );
-  background-size: 100% 32px;
+  background-image:
+    radial-gradient(
+      1100px 560px at 50% -8%,
+      rgba(255, 255, 255, 0.75),
+      transparent 62%
+    ),
+    radial-gradient(
+      820px 520px at 92% 4%,
+      rgba(166, 124, 46, 0.07),
+      transparent 58%
+    ),
+    radial-gradient(
+      720px 600px at 4% 18%,
+      rgba(157, 43, 37, 0.04),
+      transparent 60%
+    );
+  background-attachment: fixed;
+}
+
+/* Fine film grain in the negative space — texture without muddying any text. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+@layer base {
+  ::selection {
+    background: theme("colors.gold");
+    color: theme("colors.paper");
+  }
 }
 
 @layer components {
@@ -32,33 +61,109 @@ body {
   }
 
   .display {
-    @apply font-serif tracking-tight;
+    @apply font-display tracking-tight;
   }
 
+  /* Buttons — ink with a soft letterpress depth and a gentle hover lift. */
   .btn {
-    @apply inline-flex items-center justify-center rounded-md bg-ink px-5 py-2.5
-      font-sans text-sm font-medium text-paper transition
-      hover:bg-black disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] bg-ink
+      px-5 py-2.5 font-sans text-sm font-medium text-paper shadow-btn
+      transition-all duration-200 hover:-translate-y-px hover:bg-black
+      active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed
+      disabled:opacity-40 disabled:shadow-none;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-md border border-line
-      bg-transparent px-4 py-2 font-sans text-sm font-medium text-ink
-      transition hover:border-ink/40;
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px]
+      border border-line bg-raise/60 px-4 py-2 font-sans text-sm font-medium
+      text-ink shadow-sm transition-all duration-200 hover:-translate-y-px
+      hover:border-ink/30 hover:shadow-card;
   }
 
   .field {
-    @apply w-full rounded-md border border-line bg-white/60 px-3 py-2 font-sans
-      text-sm text-ink outline-none transition placeholder:text-muted
-      focus:border-ink/50;
+    @apply w-full rounded-[10px] border border-line bg-raise/80 px-3.5 py-2.5
+      font-sans text-sm text-ink shadow-inner outline-none transition
+      placeholder:text-muted/80 focus:border-gold/60
+      focus:ring-2 focus:ring-gold/20;
   }
 
   .card {
-    @apply rounded-lg border border-line bg-white/55 p-5;
+    @apply rounded-2xl border border-line bg-raise/70 p-6 shadow-card
+      backdrop-blur-[2px];
+  }
+
+  .lift {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-raised;
   }
 
   .pill {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5
-      font-sans text-xs font-medium uppercase tracking-wide;
+      font-sans text-[0.68rem] font-semibold uppercase tracking-wider;
+  }
+
+  /* Animated underline for nav / text links. */
+  .navlink {
+    @apply relative font-sans transition-colors duration-200 hover:text-ink;
+  }
+  .navlink::after {
+    content: "";
+    @apply absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-current
+      transition-transform duration-300;
+  }
+  .navlink:hover::after {
+    @apply scale-x-100;
+  }
+
+  /* Ornamental divider with a centered diamond. */
+  .rule-mark {
+    @apply relative h-px w-full;
+    background: linear-gradient(
+      to right,
+      transparent,
+      theme("colors.line"),
+      transparent
+    );
+  }
+  .rule-mark::after {
+    content: "❖";
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-paper
+      px-3 text-[0.7rem] text-gold;
+  }
+
+  /* Small uppercase kicker with a leading rule. */
+  .eyebrow {
+    @apply inline-flex items-center gap-3 font-sans text-xs font-semibold
+      uppercase tracking-[0.2em] text-gold;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-7 bg-gold/60;
+  }
+}
+
+@layer utilities {
+  .d1 {
+    animation-delay: 0.06s;
+  }
+  .d2 {
+    animation-delay: 0.13s;
+  }
+  .d3 {
+    animation-delay: 0.2s;
+  }
+  .d4 {
+    animation-delay: 0.27s;
+  }
+  .d5 {
+    animation-delay: 0.34s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
