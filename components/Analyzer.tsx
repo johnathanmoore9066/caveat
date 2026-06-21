@@ -5,15 +5,8 @@ import { siteConfig } from "@/config/site";
 import type { AnalysisResult } from "@/lib/types";
 import Result from "@/components/Result";
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
-}
+// Keep uploads under Vercel's ~4.5 MB request-body limit.
+const MAX_FILE_BYTES = 4.4 * 1024 * 1024;
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
@@ -29,28 +22,37 @@ export default function Analyzer() {
   );
   const [text, setText] = useState("");
   const [fileName, setFileName] = useState<string>("");
-  const [pdfBase64, setPdfBase64] = useState<string | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
+  function resetFile() {
+    setPdfFile(null);
+    setFileName("");
+  }
+
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     setError(null);
-    setPdfBase64(null);
-    if (!file) {
-      setFileName("");
-      return;
-    }
-    setFileName(file.name);
+    resetFile();
+    if (!file) return;
 
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      const buf = await file.arrayBuffer();
-      setPdfBase64(arrayBufferToBase64(buf));
+      if (file.size > MAX_FILE_BYTES) {
+        setError(
+          "That PDF is larger than 4 MB. Please paste the text instead, or upload a smaller file.",
+        );
+        return;
+      }
+      setPdfFile(file);
+      setFileName(file.name);
       setText("");
     } else {
+      // Treat everything else as plain text.
       const t = await file.text();
       setText(t);
+      setFileName(file.name);
     }
   }
 
@@ -59,18 +61,28 @@ export default function Analyzer() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentType,
-          text: pdfBase64 ? undefined : text,
-          pdfBase64: pdfBase64 ?? undefined,
-        }),
-      });
-      const data = await res.json();
+      let res: Response;
+      if (pdfFile) {
+        const form = new FormData();
+        form.append("documentType", documentType);
+        form.append("file", pdfFile);
+        res = await fetch("/api/analyze", { method: "POST", body: form });
+      } else {
+        res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentType, text }),
+        });
+      }
+
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong.");
+        setError(
+          data.error ??
+            (res.status === 413
+              ? "That file is too large to upload. Please paste the text instead."
+              : "Something went wrong."),
+        );
       } else {
         setResult(data.result as AnalysisResult);
       }
@@ -81,7 +93,7 @@ export default function Analyzer() {
     }
   }
 
-  const canSubmit = (!!pdfBase64 || text.trim().length >= 40) && !loading;
+  const canSubmit = (!!pdfFile || text.trim().length >= 40) && !loading;
   const price = siteConfig.pricing.readPrice;
 
   return (
@@ -121,12 +133,9 @@ export default function Analyzer() {
             value={text}
             onChange={(e) => {
               setText(e.target.value);
-              if (e.target.value) {
-                setPdfBase64(null);
-                setFileName("");
-              }
+              if (e.target.value) resetFile();
             }}
-            disabled={!!pdfBase64}
+            disabled={!!pdfFile}
           />
         </label>
 
@@ -157,7 +166,7 @@ export default function Analyzer() {
             <span className="inline-flex items-center gap-1.5 font-sans text-xs text-muted">
               <span className="h-1.5 w-1.5 rounded-full bg-good" />
               {fileName}
-              {pdfBase64 ? " — ready to read" : ""}
+              {pdfFile ? " — ready to read" : ""}
             </span>
           ) : null}
         </div>
