@@ -24,7 +24,7 @@ export const siteConfig = {
   domain: "projectcaveat.org",
 
   /** Where support / disclosure emails go. */
-  contactEmail: "hello@projectcaveat.org",
+  contactEmail: "johnathanmoore@element-fusion.org",
 
   /** Legal entity or person operating the site (shown in the disclosure page). */
   operator: "The site operator",
