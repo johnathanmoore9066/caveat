@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background-color: theme("colors.paper");
+  color: theme("colors.ink");
+  font-family: theme("fontFamily.sans");
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle paper grain via a faint repeating ruled line, like a legal pad edge. */
+body {
+  background-image: linear-gradient(
+    to bottom,
+    transparent,
+    transparent 31px,
+    rgba(28, 27, 25, 0.025) 31px,
+    rgba(28, 27, 25, 0.025) 32px
+  );
+  background-size: 100% 32px;
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-prose px-5;
+  }
+
+  .display {
+    @apply font-serif tracking-tight;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md bg-ink px-5 py-2.5
+      font-sans text-sm font-medium text-paper transition
+      hover:bg-black disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-md border border-line
+      bg-transparent px-4 py-2 font-sans text-sm font-medium text-ink
+      transition hover:border-ink/40;
+  }
+
+  .field {
+    @apply w-full rounded-md border border-line bg-white/60 px-3 py-2 font-sans
+      text-sm text-ink outline-none transition placeholder:text-muted
+      focus:border-ink/50;
+  }
+
+  .card {
+    @apply rounded-lg border border-line bg-white/55 p-5;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5
+      font-sans text-xs font-medium uppercase tracking-wide;
+  }
+}
