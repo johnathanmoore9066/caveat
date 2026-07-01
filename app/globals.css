@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
@@ -15,42 +15,109 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Warm, lit paper: a soft highlight up top and a faint gold wash to one side. */
+/* Deep-space backdrop: static color washes; the moving lights live in .fx. */
 body {
   background-image:
     radial-gradient(
-      1100px 560px at 50% -8%,
-      rgba(255, 255, 255, 0.75),
-      transparent 62%
+      900px 600px at 15% -5%,
+      rgba(124, 58, 237, 0.16),
+      transparent 60%
     ),
     radial-gradient(
-      820px 520px at 92% 4%,
-      rgba(166, 124, 46, 0.07),
-      transparent 58%
+      800px 520px at 90% 0%,
+      rgba(219, 39, 119, 0.12),
+      transparent 55%
     ),
     radial-gradient(
-      720px 600px at 4% 18%,
-      rgba(157, 43, 37, 0.04),
+      900px 700px at 50% 110%,
+      rgba(34, 211, 238, 0.08),
       transparent 60%
     );
   background-attachment: fixed;
 }
 
-/* Fine film grain in the negative space — texture without muddying any text. */
+/* Fine grain in the negative space — texture without muddying any text. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 140px 140px;
 }
 
+/* Fixed decorative layer rendered once in layout.tsx: drifting aurora blobs
+   and a perspective grid that fades out below the hero. */
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.fx-blob {
+  position: absolute;
+  width: 44rem;
+  height: 44rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.55;
+}
+.fx-1 {
+  top: -16rem;
+  left: -12rem;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(139, 92, 246, 0.5),
+    transparent 65%
+  );
+  animation: float 19s ease-in-out infinite;
+}
+.fx-2 {
+  top: -12rem;
+  right: -14rem;
+  background: radial-gradient(
+    circle at 70% 30%,
+    rgba(236, 72, 153, 0.38),
+    transparent 65%
+  );
+  animation: drift 26s ease-in-out infinite;
+}
+.fx-3 {
+  bottom: -18rem;
+  left: 28%;
+  background: radial-gradient(
+    circle at 50% 60%,
+    rgba(34, 211, 238, 0.32),
+    transparent 65%
+  );
+  animation: float 31s ease-in-out infinite;
+  animation-delay: -9s;
+}
+.fx-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(
+    ellipse 85% 55% at 50% 0%,
+    black 20%,
+    transparent 75%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 85% 55% at 50% 0%,
+    black 20%,
+    transparent 75%
+  );
+}
+
 @layer base {
   ::selection {
-    background: theme("colors.gold");
+    background: theme("colors.magenta");
     color: theme("colors.paper");
   }
 }
@@ -64,36 +131,65 @@ body::before {
     @apply font-display tracking-tight;
   }
 
-  /* Buttons — ink with a soft letterpress depth and a gentle hover lift. */
+  /* Primary button — aurora gradient with a glow and a hover sheen sweep. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-[10px] bg-ink
-      px-5 py-2.5 font-sans text-sm font-medium text-paper shadow-btn
-      transition-all duration-200 hover:-translate-y-px hover:bg-black
+    @apply relative inline-flex items-center justify-center gap-2
+      overflow-hidden rounded-xl px-5 py-2.5 font-sans text-sm font-semibold
+      text-white shadow-btn transition-all duration-200 hover:-translate-y-px
       active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed
-      disabled:opacity-40 disabled:shadow-none;
+      disabled:opacity-40 disabled:shadow-none disabled:saturate-50;
+    background-image: linear-gradient(
+      120deg,
+      #7c3aed 0%,
+      #c026d3 50%,
+      #ec4899 100%
+    );
+    background-size: 160% auto;
+    background-position: 0% center;
+  }
+  .btn:hover:not(:disabled) {
+    background-position: 100% center;
+  }
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.25) 50%,
+      transparent 60%
+    );
+    transform: translateX(-150%);
+    transition: transform 0.6s ease;
+  }
+  .btn:hover:not(:disabled)::before {
+    transform: translateX(150%);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-[10px]
-      border border-line bg-raise/60 px-4 py-2 font-sans text-sm font-medium
-      text-ink shadow-sm transition-all duration-200 hover:-translate-y-px
-      hover:border-ink/30 hover:shadow-card;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border
+      border-white/10 bg-white/[0.06] px-4 py-2 font-sans text-sm font-medium
+      text-ink backdrop-blur transition-all duration-200 hover:-translate-y-px
+      hover:border-violet/40 hover:bg-white/[0.09] hover:shadow-glow;
   }
 
   .field {
-    @apply w-full rounded-[10px] border border-line bg-raise/80 px-3.5 py-2.5
-      font-sans text-sm text-ink shadow-inner outline-none transition
-      placeholder:text-muted/80 focus:border-gold/60
-      focus:ring-2 focus:ring-gold/20;
+    @apply w-full rounded-xl border border-white/10 bg-white/[0.05] px-3.5
+      py-2.5 font-sans text-sm text-ink outline-none transition
+      placeholder:text-muted/70 focus:border-violet/50 focus:bg-white/[0.07]
+      focus:ring-2 focus:ring-violet/25;
   }
 
+  /* Frosted glass panel. */
   .card {
-    @apply rounded-2xl border border-line bg-raise/70 p-6 shadow-card
-      backdrop-blur-[2px];
+    @apply rounded-2xl border border-white/10 bg-raise/60 p-6 shadow-card
+      backdrop-blur-xl;
   }
 
   .lift {
-    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-raised;
+    @apply transition-all duration-300 hover:-translate-y-0.5
+      hover:border-violet/30 hover:shadow-raised;
   }
 
   .pill {
@@ -101,47 +197,83 @@ body::before {
       font-sans text-[0.68rem] font-semibold uppercase tracking-wider;
   }
 
-  /* Animated underline for nav / text links. */
+  /* Small glass tag chips (hero "works on" list). */
+  .chip {
+    @apply inline-flex items-center rounded-full border border-white/10
+      bg-white/[0.05] px-3 py-1 font-sans text-[0.68rem] font-medium uppercase
+      tracking-wider text-muted transition-colors duration-200
+      hover:border-violet/40 hover:text-ink;
+  }
+
+  /* Animated underline for nav / text links — draws in as a gradient. */
   .navlink {
     @apply relative font-sans transition-colors duration-200 hover:text-ink;
   }
   .navlink::after {
     content: "";
-    @apply absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-current
+    @apply absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0
       transition-transform duration-300;
+    background: linear-gradient(
+      90deg,
+      theme("colors.violet"),
+      theme("colors.magenta")
+    );
   }
   .navlink:hover::after {
     @apply scale-x-100;
   }
 
-  /* Ornamental divider with a centered diamond. */
+  /* Ornamental divider with a centered spark. */
   .rule-mark {
     @apply relative h-px w-full;
     background: linear-gradient(
       to right,
       transparent,
-      theme("colors.line"),
+      rgba(167, 139, 250, 0.45),
+      rgba(244, 114, 182, 0.45),
       transparent
     );
   }
   .rule-mark::after {
-    content: "❖";
-    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-paper
-      px-3 text-[0.7rem] text-gold;
+    content: "✦";
+    @apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+      bg-paper px-3 text-[0.7rem] text-gold;
   }
 
-  /* Small uppercase kicker with a leading rule. */
+  /* Small uppercase kicker with a leading gradient rule. */
   .eyebrow {
     @apply inline-flex items-center gap-3 font-sans text-xs font-semibold
-      uppercase tracking-[0.2em] text-gold;
+      uppercase tracking-[0.2em] text-cyan;
   }
   .eyebrow::before {
     content: "";
-    @apply h-px w-7 bg-gold/60;
+    @apply h-px w-7;
+    background: linear-gradient(
+      90deg,
+      theme("colors.violet"),
+      theme("colors.cyan")
+    );
   }
 }
 
 @layer utilities {
+  /* Gradient headline text that slowly shimmers through the aurora palette. */
+  .text-aurora {
+    background-image: linear-gradient(
+      90deg,
+      #a78bfa 0%,
+      #f472b6 26%,
+      #ffc94d 52%,
+      #67e8f9 78%,
+      #a78bfa 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 7s linear infinite;
+  }
+
   .d1 {
     animation-delay: 0.06s;
   }

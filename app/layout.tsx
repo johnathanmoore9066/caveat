@@ -1,26 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Fraunces, Newsreader } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 
-const display = Fraunces({
+const display = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
-  fallback: ["Georgia", "serif"],
+  fallback: ["system-ui", "sans-serif"],
 });
 
-const serif = Newsreader({
+const body = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
+  variable: "--font-body",
   display: "swap",
-  fallback: ["Georgia", "serif"],
-  adjustFontFallback: false,
+  fallback: ["system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -34,16 +30,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${display.variable} ${serif.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
-        <header className="sticky top-0 z-40 border-b border-line/80 bg-paper/75 backdrop-blur-md">
+        {/* Ambient aurora lights + fading grid, fixed behind everything. */}
+        <div aria-hidden className="fx">
+          <div className="fx-grid" />
+          <div className="fx-blob fx-1" />
+          <div className="fx-blob fx-2" />
+          <div className="fx-blob fx-3" />
+        </div>
+
+        <header className="sticky top-0 z-40 border-b border-white/5 bg-paper/60 backdrop-blur-xl">
           <div className="wrap flex items-center justify-between py-4">
             <Link
               href="/"
               className="font-display text-2xl font-semibold tracking-tight"
             >
               {siteConfig.name}
-              <span className="text-flag">.</span>
+              <span className="text-aurora">✦</span>
             </Link>
             <nav className="flex items-center gap-7 font-sans text-sm text-muted">
               <Link href="/" className="navlink">
@@ -58,7 +62,7 @@ export default function RootLayout({
 
         <main className="py-12 sm:py-16">{children}</main>
 
-        <footer className="mt-20 border-t border-line">
+        <footer className="mt-20 border-t border-white/5">
           <div className="wrap py-10">
             <div className="rule-mark mb-7" />
             <div className="flex flex-col gap-2 font-sans text-xs text-muted sm:flex-row sm:items-center sm:justify-between">

@@ -2,7 +2,7 @@ import type { AnalysisResult, Severity } from "@/lib/types";
 
 const badgeStyles: Record<Severity, string> = {
   high: "bg-flag-soft text-flag",
-  medium: "bg-[#F4E8D1] text-gold",
+  medium: "bg-gold-soft text-gold",
   low: "bg-line/70 text-muted",
 };
 
